@@ -18,8 +18,8 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
-        'email',
+        'username',
+        'phone_number',
         'password',
     ];
 
@@ -39,7 +39,13 @@ class User extends Authenticatable
      * @var array<string, string>
      */
     protected $casts = [
-        'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+    public function warehouseOwner()
+    {
+        return $this->hasOne(WarehouseOwner::class);
+    }public function pharmacist()
+    {
+        return $this->hasOne(Pharmacist::class);
+    }
 }
