@@ -20,3 +20,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::post('/pharmacist/signup',[PharAuth::class,'signUp']);
+Route::post('/pharmacist/login',[PharAuth::class,'login']);
