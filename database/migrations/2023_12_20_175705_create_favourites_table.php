@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('favourites', function (Blueprint $table) {
-            $table->id();
+            $table->foreignId('pharmacist_id');
+            $table->foreignId('medicine_id');
             $table->timestamps();
         });
     }
