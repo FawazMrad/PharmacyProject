@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Med;
 use App\Http\Controllers\PharAuth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -21,3 +22,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::post('/pharmacist/signup',[PharAuth::class,'signUp']);
 Route::post('/pharmacist/login',[PharAuth::class,'login']);
+Route::post('/medicine/add',[Med::class,'add']);

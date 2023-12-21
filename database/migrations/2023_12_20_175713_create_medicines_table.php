@@ -16,11 +16,11 @@ return new class extends Migration
             $table->foreignId('category_id');
             $table->foreignId('warehouse_id');
             $table->string('scientific_name');
-            $table->string('commercial_name');
+            $table->string('commercial_name')->unique();
             $table->string('company');
             $table->text('description');
-            $table->integer('quantity');
-            $table->float('price');
+            $table->integer('quantity')->unsigned();
+            $table->float('price')->unsigned();
             $table->date('expiration_date');
             $table->timestamps();
         });
