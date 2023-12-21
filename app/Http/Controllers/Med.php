@@ -56,4 +56,14 @@ class Med extends Controller
             'message' => 'Medicine added successfully!'
         ]);
     }
+
+    public function browseCategories(){
+        $categories =Category::select('id','name')->get();
+        return \response()->json($categories,200);
+    }
+    public function browseMeds(Request $request){
+        $category_id = $request->category_id;
+        $meds = Medicine::where('category_id',$category_id)->get();
+        return \response()->json($meds,200);
+    }
 }

@@ -32,6 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/pharmacist/logout', [PharAuth::class, 'logout']);  // pharmacist logout
     Route::post('/admin/logout', [AdminAuth::class, 'logout']);  // admin logout
     Route::post('/medicine/add', [Med::class, 'add']); //  add medicine for the warehouse owner
-
+    Route::get('/pharmacist/browse/categories',[Med::class,'browseCategories']); // browsing categories
+    Route::get('/pharmacist/browse/meds',[Med::class,'browseMeds']); // browsing meds
 });
 
