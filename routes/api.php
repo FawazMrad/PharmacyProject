@@ -21,12 +21,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('/pharmacist/signup',[PharAuth::class,'signUp']);
-Route::post('/pharmacist/login',[PharAuth::class,'login']);
+Route::post('/pharmacist/signup', [PharAuth::class, 'signUp']);
+Route::post('/pharmacist/login', [PharAuth::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user',function(){
-        return response()->json(['message'=>Auth::user()]);
+    Route::get('/user', function () {
+        return response()->json(['message' => Auth::user()]);
     });
     Route::post('/pharmacist/logout', [PharAuth::class, 'logout']);
-    Route::post('/medicine/add',[Med::class,'add']);
+    Route::post('/medicine/add', [Med::class, 'add']);
 });

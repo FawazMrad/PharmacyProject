@@ -38,8 +38,12 @@ class PharAuth extends Controller
         if (!$validator->fails()) {
             $auth = Auth::attempt(['username' => $request->username, 'password' => $request->password]);
             if ($auth) {
-                return response()->json(['message' => 'Login done successfully!',
-                    200]);
+                $user=Auth::user();
+                $token = $user->createToken('loginToken')->plainTextToken;
+                return response()->json([
+                    'message' => 'Login done successfully!',
+                    'access_token' => $token,
+                ], 200);
             } else {
                 return response()->json(['message' => 'Incorrect password']);
             }
@@ -48,9 +52,10 @@ class PharAuth extends Controller
         }
     }
 
-    public function logout()
+    public function logout(Request $request)
     {
-        Auth::logout();
-        return response()->json(['message' => 'Logged out successfully', 200]);
+        $user = Auth::user();
+        $user->tokens()->delete();
+        return response()->json(['message' => 'Logout successful'], 200);
     }
 }
