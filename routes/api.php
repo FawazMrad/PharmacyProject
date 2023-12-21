@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminAuth;
 use App\Http\Controllers\Med;
 use App\Http\Controllers\PharAuth;
 use Illuminate\Http\Request;
@@ -21,12 +22,16 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('/pharmacist/signup', [PharAuth::class, 'signUp']);
-Route::post('/pharmacist/login', [PharAuth::class, 'login']);
+Route::post('/pharmacist/signup', [PharAuth::class, 'signUp']); //pharmacist signup
+Route::post('/pharmacist/login', [PharAuth::class, 'login']); //pharmacist login
+Route::post('/admin/login', [AdminAuth::class, 'login']); //admin login
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function () {
         return response()->json(['message' => Auth::user()]);
     });
-    Route::post('/pharmacist/logout', [PharAuth::class, 'logout']);
-    Route::post('/medicine/add', [Med::class, 'add']);
+    Route::post('/pharmacist/logout', [PharAuth::class, 'logout']);  // pharmacist logout
+    Route::post('/admin/logout', [AdminAuth::class, 'logout']);  // admin logout
+    Route::post('/medicine/add', [Med::class, 'add']); //  add medicine for the warehouse owner
+
 });
+

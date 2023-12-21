@@ -21,7 +21,6 @@ class Med extends Controller
             ]);
         }
 //        $validator = Validator::make($request->all(), [
-
 //            'commercial_name' => 'unique:medicines',
 //            'quantity' => 'numeric|gt:0',
 //            'price' => 'numeric|gt:0',
