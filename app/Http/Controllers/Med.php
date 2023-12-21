@@ -37,36 +37,24 @@ class Med extends Controller
             $category = Category::create([
                 'name' => $request->category
             ]);
-
-            $medicine = Medicine::create([
-                'scientific_name' => $request->scientific_name,
-                'commercial_name' => $request->commercial_name,
-                'company' => $request->company,
-                'description' => $request->description,
-                'quantity' => $request->quantity,
-                'price' => $request->price,
-                'expiration_date' => $request->expiration_date,
-                'category_id' => $category->id,
-                'warehouse_id' => 1
-            ]);
         } else {
-            $medicine = Medicine::create([
-                'scientific_name' => $request->scientific_name,
-                'commercial_name' => $request->commercial_name,
-                'company' => $request->company,
-                'description' => $request->description,
-                'quantity' => $request->quantity,
-                'price' => $request->price,
-                'expiration_date' => $request->expiration_date,
-                'category_id' => (Category::where('name', $request->category))->first()->id,
-                'warehouse_id' => 1
-            ]);
+            $category = Category::where('name', $request->category)->first();
         }
+
+
+        $medicine = Medicine::create([
+            'scientific_name' => $request->scientific_name,
+            'commercial_name' => $request->commercial_name,
+            'company' => $request->company,
+            'description' => $request->description,
+            'quantity' => $request->quantity,
+            'price' => $request->price,
+            'expiration_date' => $request->expiration_date,
+            'category_id' => $category->id,
+            'warehouse_id' => 1
+        ]);
         return \response()->json([
             'message' => 'Medicine added successfully!'
         ]);
-
-        //       }
-
     }
 }
