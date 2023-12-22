@@ -22,11 +22,12 @@ class AdminAuth extends Controller
             return response()->json(['message' => 'Login failed']);
         }
     }
+
     public function logout()
     {
-        $user=Auth::user();
+        $user = Auth::user();
         $user->tokens()->delete();
-        return response()->json(['message'=>'Logged out successfully',200]);
+        return response()->json(['message' => 'Logged out successfully', 200]);
     }
 }
 

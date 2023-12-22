@@ -16,9 +16,7 @@ class Med extends Controller
         $company = $request->company;
         $Meds = Medicine::where('company', $company)->get();
         if ($Meds->contains('commercial_name', $commercial_name)) {
-            return \response()->json([
-                'message' => 'Medicine already existed'
-            ]);
+            return \response()->json(['message' => 'Medicine already existed']);
         }
 //        $validator = Validator::make($request->all(), [
 //            'commercial_name' => 'unique:medicines',
@@ -33,37 +31,49 @@ class Med extends Controller
         //       } else
         //    {
         if (!(Category::where('name', $request->category))->first()) {
-            $category = Category::create([
-                'name' => $request->category
-            ]);
+            $category = Category::create(['name' => $request->category]);
         } else {
             $category = Category::where('name', $request->category)->first();
         }
 
 
-        $medicine = Medicine::create([
-            'scientific_name' => $request->scientific_name,
-            'commercial_name' => $request->commercial_name,
-            'company' => $request->company,
-            'description' => $request->description,
-            'quantity' => $request->quantity,
-            'price' => $request->price,
-            'expiration_date' => $request->expiration_date,
-            'category_id' => $category->id,
-            'warehouse_id' => 1
-        ]);
-        return \response()->json([
-            'message' => 'Medicine added successfully!'
-        ]);
+        $medicine = Medicine::create(['scientific_name' => $request->scientific_name, 'commercial_name' => $request->commercial_name, 'company' => $request->company, 'description' => $request->description, 'quantity' => $request->quantity, 'price' => $request->price, 'expiration_date' => $request->expiration_date, 'category_id' => $category->id, 'warehouse_id' => 1]);
+        return \response()->json(['message' => 'Medicine added successfully!']);
     }
 
-    public function browseCategories(){
-        $categories =Category::select('id','name')->get();
-        return \response()->json($categories,200);
+    public function browseCategories()
+    {
+        $categories = Category::select('id', 'name')->get();
+        return \response()->json($categories, 200);
     }
-    public function browseMeds(Request $request){
+
+    public function browseMeds(Request $request)
+    {
         $category_id = $request->category_id;
-        $meds = Medicine::where('category_id',$category_id)->get();
-        return \response()->json($meds,200);
+        $meds = Medicine::where('category_id', $category_id)->get();
+        return \response()->json($meds, 200);
+    }
+
+    public function search(Request $request)
+    {
+        $searchContent = strtolower($request->name);
+        $searchContent = strtolower($request->name);
+        $med = Medicine::where('commercial_name', $searchContent)->first();
+        if ($med) {
+            return response()->json(['id' => $med->id, 'commercial_name' => $med->commercial_name, 'scientific_name' => $med->scientific_name, 'company' => $med->company, 'description' => $med->description, 'quantity' => $med->quantity, 'price' => $med->price, 'expiration_date' => $med->expiration_date, 'category' => $med->category->name, 'from' => 'medicine'], 200);
+        } else {
+            $cat = Category::where('name', $searchContent)->first();
+            if ($cat) return response()->json(['id' => $cat->id, 'name' => $cat->name, 'from' => 'category'], 200);
+
+            return response()->json(['message' => 'No medicine or category found'], 404);
+        }
+
+    }
+
+    public function showMedSpec(Request $request)
+    {
+        $id = $request->id;
+        $med = Medicine::where('id', $id)->first();
+        return \response()->json($med, 200);
     }
 }

@@ -34,5 +34,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/medicine/add', [Med::class, 'add']); //  add medicine for the warehouse owner
     Route::get('/pharmacist/browse/categories',[Med::class,'browseCategories']); // browsing categories
     Route::get('/pharmacist/browse/meds',[Med::class,'browseMeds']); // browsing meds
+    Route::get('/search',[Med::class,'search']);  //pharmacist or warehouse owner search
+    Route::get('/medicine/show',[Med::class,'showMedSpec']); //pharmacist or warehouse owner search
 });
 
