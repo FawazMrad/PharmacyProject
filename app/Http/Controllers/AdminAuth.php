@@ -13,8 +13,7 @@ class AdminAuth extends Controller
         $adminName = $request->username;
         $adminPass = $request->password;
         if ($adminName === "Admin" && $adminPass === "admin123") {
-
-            $auth = Auth::attempt(['username' => $request->username, 'password' => $request->password]);
+            $auth = Auth::attempt(['username' => $adminName, 'password' => $adminPass]);
             $user = Auth::user();
             $token = $user->createToken('loginToken')->plainTextToken;
             return response()->json(['message' => 'Login done successfully!', 'access_token' => $token,], 200);
