@@ -37,6 +37,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/pharmacist/browse/meds',[Med::class,'browseMedsByCat']); // browsing meds
     Route::get('/search',[Med::class,'searchList']);  //pharmacist or warehouse owner search        method name:search/searchList
     Route::get('/medicine/show',[Med::class,'showMedSpec']); //pharmacist or warehouse owner search
-    Route::post('/pharmacist/create/order',[OrderController::class,'createOrder']);
+    Route::post('/pharmacist/create/order',[OrderController::class,'createOrder']); // pharmacist creating order
+    Route::get('/pharmacist/browse/orders',[OrderController::class,'browsePharOrders']); // pharmacist browsing orders
+    Route::get('/admin/browse/orders',[OrderController::class,'browseAdminOrders']);  // admin browsing orders
+    Route::patch('/admin/change/order/status',[OrderController::class,'changeOrderStatus']); // admin changing order status
+    Route::patch('/admin/change/order/payment/status',[OrderController::class,'changeOrderPaymentStatus']); // admin changing order payment status
 });
 
