@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminAuth;
 use App\Http\Controllers\Med;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PharAuth;
+use App\Models\Medicine;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -42,5 +43,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/browse/orders',[OrderController::class,'browseAdminOrders']);  // admin browsing orders
     Route::patch('/admin/change/order/status',[OrderController::class,'changeOrderStatus']); // admin changing order status
     Route::patch('/admin/change/order/payment/status',[OrderController::class,'changeOrderPaymentStatus']); // admin changing order payment status
+    Route::post('/medicine/change/favourite/status',[Med::class,'changeFavStatus']); //change favourite status
+    Route::get('/pharmacist/browse/favourites',[Med::class,'browseFavourites']); //change favourite status
 });
 

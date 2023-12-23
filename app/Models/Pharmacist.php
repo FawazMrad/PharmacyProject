@@ -4,7 +4,6 @@ namespace App\Models;
 use App\Models\Medicine;
 use App\Models\Order;
 use App\Models\OrderMedicine;
-use App\Models\Pharmacist;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
