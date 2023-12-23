@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminAuth;
 use App\Http\Controllers\Med;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PharAuth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -34,7 +35,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/medicine/add', [Med::class, 'add']); //  add medicine for the warehouse owner
     Route::get('/pharmacist/browse/categories',[Med::class,'browseCategories']); // browsing categories
     Route::get('/pharmacist/browse/meds',[Med::class,'browseMedsByCat']); // browsing meds
-    Route::get('/search',[Med::class,'searchList']);  //pharmacist or warehouse owner search
+    Route::get('/search',[Med::class,'searchList']);  //pharmacist or warehouse owner search        method name:search/searchList
     Route::get('/medicine/show',[Med::class,'showMedSpec']); //pharmacist or warehouse owner search
+    Route::post('/pharmacist/create/order',[OrderController::class,'createOrder']);
 });
 

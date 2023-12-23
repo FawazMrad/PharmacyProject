@@ -16,7 +16,7 @@ class AdminAuth extends Controller
             $auth = Auth::attempt(['username' => $adminName, 'password' => $adminPass]);
             $user = Auth::user();
             $token = $user->createToken('loginToken')->plainTextToken;
-            return response()->json(['message' => 'Login done successfully!', 'access_token' => $token,], 200);
+            return response()->json(['message' => 'Login done successfully!', 'access_token' => $token,'user_id'=>$user->id], 200);
         } else {
             return response()->json(['message' => 'Login failed']);
         }
