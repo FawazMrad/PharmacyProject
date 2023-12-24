@@ -140,5 +140,6 @@ class Med extends Controller
         return \response()->json(['message' => 'No medicines found'], 404);
 
     }
+
 }
 

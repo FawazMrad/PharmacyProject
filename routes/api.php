@@ -1,5 +1,4 @@
 <?php
-
 use App\Http\Controllers\AdminAuth;
 use App\Http\Controllers\Med;
 use App\Http\Controllers\OrderController;
@@ -43,7 +42,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/browse/orders',[OrderController::class,'browseAdminOrders']);  // admin browsing orders
     Route::patch('/admin/change/order/status',[OrderController::class,'changeOrderStatus']); // admin changing order status
     Route::patch('/admin/change/order/payment/status',[OrderController::class,'changeOrderPaymentStatus']); // admin changing order payment status
-    Route::post('/medicine/change/favourite/status',[Med::class,'changeFavStatus']); //change favourite status
-    Route::get('/pharmacist/browse/favourites',[Med::class,'browseFavourites']); //change favourite status
+    Route::post('/medicine/change/favourite/status',[Med::class,'changeFavStatus']); //pharmacist change favourite status
+    Route::get('/pharmacist/browse/favourites',[Med::class,'browseFavourites']); //  pharmacist browse favourites
+    Route::get('/admin/history',[OrderController::class,'history']);// admin history
 });
 

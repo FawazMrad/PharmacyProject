@@ -26,4 +26,6 @@ class Order extends Model
     public function pharmacist(){
         return $this->belongsTo(Pharmacist::class);
     }
+
+
 }

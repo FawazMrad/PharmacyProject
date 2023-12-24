@@ -17,7 +17,7 @@ class OrderController extends Controller
         $user_id = Auth::user()->id;
         $pharmacist_id = Pharmacist::where('user_id',$user_id)->first()->id;
         $order = Order::create(['warehouse_id' => 1, 'pharmacist_id' => $pharmacist_id, 'date_ordered' => today(), 'total_price' => 0, 'status' => 'UNDER PREPARATION', 'payment_status' => 'UNPAID']);
-        $orderedMeds = $request->all();
+        $orderedMeds = $request->all();   //id , quantity
         $unAvailableMedsCount = 0;
         $unAvailableMeds = [];
         foreach ($orderedMeds as $orderedMed) {
@@ -100,5 +100,24 @@ class OrderController extends Controller
         }
         return response()->json(['message' => 'Action denied'], 400);
     }
+    public function history(Request $request)
+    {
+       $starting_date = $request->starting_date;
+        $ending_date = $request->ending_date;
+        $orders = Order::with('orderMedicine')->whereIn('date_ordered', [$starting_date, $ending_date])->get();
 
-}
+        if (count($orders) > 0) {
+            $medsIds = [];
+
+            $meds = [];
+            $medsInOrder = [];
+
+            foreach ($orders as $order) { // for the order
+                foreach($order['order_medicines'] as $order_medicine) // order medicine
+                {
+
+                }
+            }
+    }
+    }
+        }
