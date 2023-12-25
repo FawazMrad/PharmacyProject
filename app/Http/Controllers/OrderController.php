@@ -6,16 +6,18 @@ use App\Models\Medicine;
 use App\Models\Order;
 use App\Models\OrderMedicine;
 use App\Models\Pharmacist;
+use Couchbase\IndexFailureException;
 use http\Env\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Collection;
 
 class OrderController extends Controller
 {
     public function createOrder(Request $request)
     {
         $user_id = Auth::user()->id;
-        $pharmacist_id = Pharmacist::where('user_id',$user_id)->first()->id;
+        $pharmacist_id = Pharmacist::where('user_id', $user_id)->first()->id;
         $order = Order::create(['warehouse_id' => 1, 'pharmacist_id' => $pharmacist_id, 'date_ordered' => today(), 'total_price' => 0, 'status' => 'UNDER PREPARATION', 'payment_status' => 'UNPAID']);
         $orderedMeds = $request->all();   //id , quantity
         $unAvailableMedsCount = 0;
@@ -64,15 +66,41 @@ class OrderController extends Controller
         }
         return response()->json(['message' => 'You have no orders yet'], 404);
     }
-
+// Under Preparation , Sent , Received
+//    public function changeOrderStatus(Request $request)
+//    {
+//        $status = $request->status;
+//        $order_id = $request->order_id;
+//        $order = Order::where('id', $order_id)->first();
+//        $order_old_status = $order->status;
+//        if ($order->status != 'SENT') {
+//            $order->update(['status' => $status]);
+//            if ($order->status === 'SENT') {
+//                $orderMeds = OrderMedicine::where('order_id', $order->id)->get();
+//                foreach ($orderMeds as $orderMed) {
+//                    $med_id = $orderMed->medicine_id;
+//                    $order_med_quantity = $orderMed->quantity;
+//                    $med = Medicine::where('id', $med_id)->first();
+//                    $med_quantity = $med->quantity;
+//                    $med->update(['quantity' => ($med_quantity - $order_med_quantity)]);
+//                }
+//                return response()->json(['message' => 'Status updated successfully!'], 200);
+//
+//            }
+//            return response()->json(['message' => 'Status updated successfully!'], 200);
+//        }
+//        return Response()->json(['message' => 'Action denied'], 400);
+//    }
     public function changeOrderStatus(Request $request)
     {
         $status = $request->status;
         $order_id = $request->order_id;
         $order = Order::where('id', $order_id)->first();
-        if ($order->status != 'SENT') {
-            $order->update(['status' => $status]);
-            if ($order->status === 'SENT') {
+        $order_payment_status = $order->payment_status;
+        $order_old_status = $order->status;
+        if ($order_old_status === 'UNDER PREPARATION' && $status === 'SENT') {
+            if ($order_payment_status === 'PAID') {
+                $order->update(['status' => $status]);
                 $orderMeds = OrderMedicine::where('order_id', $order->id)->get();
                 foreach ($orderMeds as $orderMed) {
                     $med_id = $orderMed->medicine_id;
@@ -81,12 +109,15 @@ class OrderController extends Controller
                     $med_quantity = $med->quantity;
                     $med->update(['quantity' => ($med_quantity - $order_med_quantity)]);
                 }
-                return response()->json(['message' => 'Status updated successfully!'], 200);
-
+                return response()->json(['message' => 'Order sent successfully!'], 200);
             }
-            return response()->json(['message' => 'Status updated successfully!'], 200);
+            return response()->json(['message' => 'Order unpaid yet!'], 400);
         }
-        return Response()->json(['message'=>'Action denied'],400);
+        if ($order_old_status === 'SENT' && $status === 'RECEIVED') {
+            $order->update(['status' => $status]);
+            return response()->json(['message' => 'Order received successfully!'], 200);
+        }
+        return response()->json(['message' => 'Action denied!'], 400);
     }
 
 
@@ -100,24 +131,36 @@ class OrderController extends Controller
         }
         return response()->json(['message' => 'Action denied'], 400);
     }
+
     public function history(Request $request)
     {
-       $starting_date = $request->starting_date;
+//        $col = collect([]);
+//        $col->put('name', 'quantity');
+//        dd($col);
+
+        $starting_date = $request->starting_date;
         $ending_date = $request->ending_date;
-        $orders = Order::with('orderMedicine')->whereIn('date_ordered', [$starting_date, $ending_date])->get();
-
+        $orders = Order::whereBetween('date_ordered', ["$starting_date", "$ending_date"])->get();
+        $totalPrice = 0.0; // the orders total price
+        $medsWithValues = Collection::make();
+        // collection has all the medicines and their values in the whole orders in specific time
         if (count($orders) > 0) {
-            $medsIds = [];
-
-            $meds = [];
-            $medsInOrder = [];
-
             foreach ($orders as $order) { // for the order
-                foreach($order['order_medicines'] as $order_medicine) // order medicine
+                $totalPrice += $order->total_price;
+                $orderMeds = OrderMedicine::where('order_id', $order->id)->get();
+                foreach ($orderMeds as $orderMed) // order medicine
                 {
-
+                    $med_name = Medicine::where('id', $orderMed->medicine_id)->first()->commercial_name;
+                    $med_quantity = $orderMed->quantity;
+                    if ($medsWithValues->has($med_name)) {
+                        $medsWithValues[$med_name] += $med_quantity;
+                    } else {
+                        $medsWithValues->put($med_name, $med_quantity);
+                    }
                 }
             }
-    }
-    }
+            return response()->json(['orders' => $orders, 'total_price' => $totalPrice, 'meds_with_their_values' => ($medsWithValues->toArray())]);
         }
+        return response()->json(['message', 'You have not have any order yet'], 404);
+    }
+}

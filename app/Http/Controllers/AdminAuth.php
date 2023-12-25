@@ -12,7 +12,7 @@ class AdminAuth extends Controller
     {
         $adminName = $request->username;
         $adminPass = $request->password;
-        if ($adminName === "Admin" && $adminPass === "admin123") {
+        if ($adminName === "Admin" && $adminPass === "admin") {
             $auth = Auth::attempt(['username' => $adminName, 'password' => $adminPass]);
             $user = Auth::user();
             $token = $user->createToken('loginToken')->plainTextToken;

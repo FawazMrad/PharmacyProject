@@ -21,18 +21,6 @@ class Med extends Controller
         if ($Meds->contains('commercial_name', $commercial_name)) {
             return \response()->json(['message' => 'Medicine already existed']);
         }
-//        $validator = Validator::make($request->all(), [
-//            'commercial_name' => 'unique:medicines',
-//            'quantity' => 'numeric|gt:0',
-//            'price' => 'numeric|gt:0',
-//
-//        ]);
-//        if ($validator->fails()) {
-//            return response()->json([
-//                'message' => $validator->messages()
-//            ]);
-        //       } else
-        //    {
         if (!(Category::where('name', $request->category))->first()) {
             $category = Category::create(['name' => $request->category]);
         } else {
@@ -86,12 +74,12 @@ class Med extends Controller
 
     public function getSimilarCatsByName($name)
     {
-        return Category::where('name', 'like', '%' . $name . '%')->select('id', 'name')->get();
+        return Category::where('name', 'like', '%' . $name . '%')->get();
     }
 
     public function getSimilarMedsByName($name)
     {
-        return Medicine::where('commercial_name', 'like', '%' . $name . '%')->select('id', 'commercial_name')->get();
+        return Medicine::where('commercial_name', 'like', '%' . $name . '%')->get();
     }
 
     public function showMedSpec(Request $request)
