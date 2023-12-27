@@ -111,10 +111,6 @@ class OrderController extends Controller
 
     public function history(Request $request)
     {
-//        $col = collect([]);
-//        $col->put('name', 'quantity');
-//        dd($col);
-
         $starting_date = $request->starting_date;
         $ending_date = $request->ending_date;
         $orders = Order::whereBetween('date_ordered', ["$starting_date", "$ending_date"])->get();
