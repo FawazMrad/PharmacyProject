@@ -134,10 +134,6 @@ class OrderController extends Controller
 
     public function history(Request $request)
     {
-//        $col = collect([]);
-//        $col->put('name', 'quantity');
-//        dd($col);
-
         $starting_date = $request->starting_date;
         $ending_date = $request->ending_date;
         $orders = Order::whereBetween('date_ordered', ["$starting_date", "$ending_date"])->get();
@@ -161,6 +157,6 @@ class OrderController extends Controller
             }
             return response()->json(['orders' => $orders, 'total_price' => $totalPrice, 'meds_with_their_values' => ($medsWithValues->toArray())]);
         }
-        return response()->json(['message', 'You have not have any order yet'], 404);
+        return response()->json(['message', 'You do not have any orders yet'], 404);
     }
 }
