@@ -46,6 +46,6 @@ class PharAuth extends Controller
     {
         $user = Auth::user();
         $user->tokens()->delete();
-        return response()->json(['message' => 'Logout successful'], 200);
+        return response()->json(['message' => 'Logged out successfully'], 200);
     }
 }

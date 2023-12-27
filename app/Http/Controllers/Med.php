@@ -86,7 +86,10 @@ class Med extends Controller
     {
         $id = $request->id;
         $med = Medicine::where('id', $id)->first();
-        return \response()->json($med, 200);
+        return \response()->json([
+            "medicine" => $med,
+            "category" => $med->category->name
+        ], 200);
     }
 
 

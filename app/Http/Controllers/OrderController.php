@@ -25,13 +25,14 @@ class OrderController extends Controller
         foreach ($orderedMeds as $orderedMed) {
             $currentMed = Medicine::where('id', $orderedMed['id'])->first();
             $currentMedAvailableQuantity = $currentMed->quantity;
-            if ($currentMedAvailableQuantity >= $orderedMed['quantity']) {
+            $currentMedExpDate = $currentMed->expiration_date;
+            if ($currentMedAvailableQuantity >= $orderedMed['quantity'] && $currentMedExpDate >= today()->addYears(2)) {
                 $orderMed = OrderMedicine::create(['order_id' => $order->id, 'medicine_id' => $orderedMed['id'], 'quantity' => $orderedMed['quantity']]);
                 $order->update(['total_price' => $order->total_price += ($currentMed->price) * $orderedMed['quantity']]);
-
+                $currentMed->update(['quantity' => $currentMedAvailableQuantity - $orderedMed['quantity']]);
             } else {
                 $unAvailableMedsCount++;
-                $unAvailableMeds[] = [$currentMed->commercial_name, $currentMed->quantity];
+                $unAvailableMeds[] = ["medicine name" => $currentMed->commercial_name, 'quantity' => $currentMedAvailableQuantity, 'expiration date' => $currentMedExpDate];
             }
         }
         if ($unAvailableMedsCount === 0) {
@@ -41,7 +42,7 @@ class OrderController extends Controller
                 $order->delete();
                 return response()->json(['message' => 'Order failed,Warehouse lacks of medicines you want', 'unavailable_meds' => json_encode($unAvailableMeds)], 404);
             }
-            return response()->json(['message' => 'Some of the medicines you ordered are not available', 'unavailable_meds' => json_encode($unAvailableMeds)], 206);
+            return response()->json(['message' => 'Some of the medicines you ordered are either not available or expired', 'unavailable_meds' => json_encode($unAvailableMeds)], 206);
         }
     }
 
@@ -66,31 +67,7 @@ class OrderController extends Controller
         }
         return response()->json(['message' => 'You have no orders yet'], 404);
     }
-// Under Preparation , Sent , Received
-//    public function changeOrderStatus(Request $request)
-//    {
-//        $status = $request->status;
-//        $order_id = $request->order_id;
-//        $order = Order::where('id', $order_id)->first();
-//        $order_old_status = $order->status;
-//        if ($order->status != 'SENT') {
-//            $order->update(['status' => $status]);
-//            if ($order->status === 'SENT') {
-//                $orderMeds = OrderMedicine::where('order_id', $order->id)->get();
-//                foreach ($orderMeds as $orderMed) {
-//                    $med_id = $orderMed->medicine_id;
-//                    $order_med_quantity = $orderMed->quantity;
-//                    $med = Medicine::where('id', $med_id)->first();
-//                    $med_quantity = $med->quantity;
-//                    $med->update(['quantity' => ($med_quantity - $order_med_quantity)]);
-//                }
-//                return response()->json(['message' => 'Status updated successfully!'], 200);
-//
-//            }
-//            return response()->json(['message' => 'Status updated successfully!'], 200);
-//        }
-//        return Response()->json(['message' => 'Action denied'], 400);
-//    }
+
     public function changeOrderStatus(Request $request)
     {
         $status = $request->status;
@@ -101,14 +78,14 @@ class OrderController extends Controller
         if ($order_old_status === 'UNDER PREPARATION' && $status === 'SENT') {
             if ($order_payment_status === 'PAID') {
                 $order->update(['status' => $status]);
-                $orderMeds = OrderMedicine::where('order_id', $order->id)->get();
-                foreach ($orderMeds as $orderMed) {
-                    $med_id = $orderMed->medicine_id;
-                    $order_med_quantity = $orderMed->quantity;
-                    $med = Medicine::where('id', $med_id)->first();
-                    $med_quantity = $med->quantity;
-                    $med->update(['quantity' => ($med_quantity - $order_med_quantity)]);
-                }
+//                $orderMeds = OrderMedicine::where('order_id', $order->id)->get();
+//                foreach ($orderMeds as $orderMed) {
+//                    $med_id = $orderMed->medicine_id;
+//                    $order_med_quantity = $orderMed->quantity;
+//                    $med = Medicine::where('id', $med_id)->first();
+//                    $med_quantity = $med->quantity;
+//                    $med->update(['quantity' => ($med_quantity - $order_med_quantity)]);
+//                }
                 return response()->json(['message' => 'Order sent successfully!'], 200);
             }
             return response()->json(['message' => 'Order unpaid yet!'], 400);
@@ -159,8 +136,8 @@ class OrderController extends Controller
                     }
                 }
             }
-            return response()->json(['orders' => $orders, 'total_price' => $totalPrice, 'meds_with_their_values' => ($medsWithValues->toArray())]);
+            return response()->json(['orders' => $orders, 'total_price' => $totalPrice, 'meds_with_their_values' => $medsWithValues]);
         }
-        return response()->json(['message', 'You have not have any order yet'], 404);
+        return response()->json(['message', 'You do not have any orders yet'], 404);
     }
 }
