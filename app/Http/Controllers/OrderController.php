@@ -29,7 +29,6 @@ class OrderController extends Controller
             if ($currentMedAvailableQuantity >= $orderedMed['quantity'] && $currentMedExpDate >= today()->addYears(2)) {
                 $orderMed = OrderMedicine::create(['order_id' => $order->id, 'medicine_id' => $orderedMed['id'], 'quantity' => $orderedMed['quantity']]);
                 $order->update(['total_price' => $order->total_price += ($currentMed->price) * $orderedMed['quantity']]);
-                $currentMed->update(['quantity' => $currentMedAvailableQuantity - $orderedMed['quantity']]);
             } else {
                 $unAvailableMedsCount++;
                 $unAvailableMeds[] = ["medicine name" => $currentMed->commercial_name, 'quantity' => $currentMedAvailableQuantity, 'expiration date' => $currentMedExpDate];
@@ -42,7 +41,7 @@ class OrderController extends Controller
                 $order->delete();
                 return response()->json(['message' => 'Order failed,Warehouse lacks of medicines you want', 'unavailable_meds' => json_encode($unAvailableMeds)], 404);
             }
-            return response()->json(['message' => 'Some of the medicines you ordered are either not available or expired', 'unavailable_meds' => json_encode($unAvailableMeds)], 206);
+            return response()->json(['message' => 'Some of the medicines you ordered are either not available or expire soon', 'unavailable_meds' => json_encode($unAvailableMeds)], 206);
         }
     }
 
@@ -56,7 +55,6 @@ class OrderController extends Controller
             return response()->json([$orders], 200);
         }
         return response()->json(['message' => 'You have no orders yet'], 404);
-
     }
 
     public function browseAdminOrders()
@@ -78,14 +76,6 @@ class OrderController extends Controller
         if ($order_old_status === 'UNDER PREPARATION' && $status === 'SENT') {
             if ($order_payment_status === 'PAID') {
                 $order->update(['status' => $status]);
-//                $orderMeds = OrderMedicine::where('order_id', $order->id)->get();
-//                foreach ($orderMeds as $orderMed) {
-//                    $med_id = $orderMed->medicine_id;
-//                    $order_med_quantity = $orderMed->quantity;
-//                    $med = Medicine::where('id', $med_id)->first();
-//                    $med_quantity = $med->quantity;
-//                    $med->update(['quantity' => ($med_quantity - $order_med_quantity)]);
-//                }
                 return response()->json(['message' => 'Order sent successfully!'], 200);
             }
             return response()->json(['message' => 'Order unpaid yet!'], 400);
@@ -97,12 +87,44 @@ class OrderController extends Controller
         return response()->json(['message' => 'Action denied!'], 400);
     }
 
+    public function checkIfWharhouseLacksOfOrderMeds($order)
+    {
+        $orderMeds = OrderMedicine::where('order_id', $order->id)->get();
+        foreach ($orderMeds as $orderMed) {
+            $med_id = $orderMed->medicine_id;
+            $order_med_quantity = $orderMed->quantity;
+            $med = Medicine::where('id', $med_id)->first();
+            $med_quantity = $med->quantity;
+            if ($med_quantity < $order_med_quantity) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function updateOrderMedsQuantitiy($order)
+    {
+        $orderMeds = OrderMedicine::where('order_id', $order->id)->get();
+        foreach ($orderMeds as $orderMed) {
+            $med_id = $orderMed->medicine_id;
+            $order_med_quantity = $orderMed->quantity;
+            $med = Medicine::where('id', $med_id)->first();
+            $med_quantity = $med->quantity;
+            $med->update(['quantity' => ($med_quantity - $order_med_quantity)]);
+        }
+    }
+
 
     public function changeOrderPaymentStatus(Request $request)
     {
         $order_id = $request->order_id;
         $order = Order::where('id', $order_id)->first();
         if ($order->payment_status === "UNPAID") {
+            if ($this->checkIfWharhouseLacksOfOrderMeds($order)) {
+                return \response()->json([
+                    'message' => 'The order must have been paid sooner,Some of the medicines are not available anymore, Check out later!']);
+            }
+            $this->updateOrderMedsQuantitiy($order);
             $order->update(['payment_status' => 'PAID']);
             return response()->json(['message' => 'Payment status updated successfully!'], 200);
         }
