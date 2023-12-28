@@ -15,11 +15,18 @@ class Med extends Controller
 {
     public function add(Request $request)
     {
+        $quantity = $request->quantity;
+        if ($quantity < 0)
+            return \response()->json(['message'=>'Enter positive value'],400);
         $commercial_name = $request->commercial_name;
         $company = $request->company;
         $Meds = Medicine::where('company', $company)->get();
         if ($Meds->contains('commercial_name', $commercial_name)) {
-            return \response()->json(['message' => 'Medicine already existed']);
+            $med=Medicine::where('commercial_name',$commercial_name)->first();
+            $med_old_quantity=$med->quantity;
+            $med->update(['quantity' => ($quantity+$med_old_quantity), 'price' => $request->price]);
+            return \response()->json(['message' => 'Medicine quantity updated successfully!']);
+           // return \response()->json(['message' => 'Medicine already existed']);
         }
         if (!(Category::where('name', $request->category))->first()) {
             $category = Category::create(['name' => $request->category]);
